@@ -1,0 +1,174 @@
+<!-- https://codepen.io/augbog/pen/LEXZKK
+https://observablehq.com/@d3/d3-hierarchy
+https://medium.com/nightingale/making-hierarchy-layouts-with-d3-hierarchy-fdb36d0a9c56
+https://www.d3indepth.com/hierarchies/ -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tree Example</title>
+
+    <style>
+	
+        .node {
+            cursor: pointer;
+        }
+    
+        .node circle {
+          fill: #fff;
+          stroke: steelblue;
+          stroke-width: 3px;
+        }
+    
+        .node text {
+          font: 12px sans-serif;
+        }
+    
+        .link {
+          fill: none;
+          stroke: #ccc;
+          stroke-width: 2px;
+        }
+        
+        </style>
+
+</head>
+<body>
+
+    <h1>https://bl.ocks.org/d3noob/8375092</h1>
+    <!-- load the d3.js library -->	
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.17/d3.min.js"></script>
+        
+    <script>
+
+        // ----------------------------------------- CHART PLACEMENT -----------------------------------------
+
+        var margin = {top: 20, right: 120, bottom: 20, left: 120};
+        var width = 960 - margin.right - margin.left;
+        var height = 500 - margin.top - margin.bottom;
+
+        // grab body
+        var svg = d3.select("body")
+
+        // append svg canvas
+        svg = svg.append("svg")
+            .attr("width", width + margin.right + margin.left)
+            .attr("height", height + margin.top + margin.bottom)
+
+        // append group/focal point of chart
+        svg = svg.append("g")
+            .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+        // ----------------------------------------- DATA -----------------------------------------
+
+
+        var tree = d3.layout.tree()
+            .size([height, width]);
+
+        // this is grabbing svg data from the tree layout, but dont know how
+        var diagonal = d3.svg.diagonal()
+            .projection(function(d) { 
+                console.log(d)
+                return [d.y, d.x]; });
+
+
+        var treeData = [
+            {
+                "name": "Top Level",
+                "parent": "null",
+                "children": [
+                {
+                    "name": "Level 2: A",
+                    "parent": "Top Level",
+                    "children": [
+                    {
+                        "name": "Son of A",
+                        "parent": "Level 2: A"
+                    },
+                    {
+                        "name": "Daughter of A",
+                        "parent": "Level 2: A"
+                    }
+                    ]
+                },
+                {
+                    "name": "Level 2: B",
+                    "parent": "Top Level"
+                }
+                ]
+            }
+        ];
+        
+        var root = treeData[0];
+        
+        draw_tree(root);
+
+        function draw_tree(source) {
+
+            // ----------------------------------------- SETUP -----------------------------------------
+
+            var i = 0;
+            var duration = 750*4;
+
+            var nodes = tree.nodes(root).reverse();
+            var links = tree.links(nodes);
+
+            // beginning animation
+            source.x0 = height / 2; // where the leves start from
+            source.y0 = 0; // where the connectors start from
+
+            // ----------------------------------------- RENDERING -----------------------------------------
+
+            // Update the nodes… and assign id
+            var node = svg.selectAll("g.node")
+                .data(nodes, function(d) { return d.id || (d.id = ++i); });
+
+            // // Enter any new nodes at the parent's previous position.
+            var nodeEnter = node.enter().append("g")
+                .attr("class", "node")
+                .attr("transform", function(d) { return "translate(" + source.y0 + "," + source.x0 + ")"; })
+
+            nodeEnter.append("circle")
+                .attr("r", 10)
+                .style("fill", function(d) { return d._children ? "lightsteelblue" : "#fff"; });
+
+            nodeEnter.append("text")
+                .attr("x", function(d) { return d.children || d._children ? -13 : 13; })
+                .attr("dy", ".35em")
+                .attr("text-anchor", function(d) { return d.children || d._children ? "end" : "start"; })
+                .text(function(d) { return d.name; })
+                .style("fill-opacity", 1);
+
+
+            // Moves nodes from where they originate
+            var nodeUpdate = node.transition()
+                .duration(duration)
+                .attr("transform", function(d) { return "translate(" + d.y + "," + d.x + ")"; });
+
+
+            var link = svg.selectAll("path.link")
+                .data(links, function(d) { return d.target.id; });
+
+            // Enter any new links at the parent's previous position.
+            link.enter().insert("path", "g")
+                .attr("class", "link")
+                // this function defines the animation
+                .attr("d", function(d) { 
+                    var o = {x: source.x0, y: source.y0};
+                    return diagonal({source: o, target: o});
+                });
+
+            // This runs the animation defined above
+            link.transition()
+                .duration(duration)
+                .attr("d", diagonal);
+
+        }
+
+    </script>
+    
+</body>
+</html>
