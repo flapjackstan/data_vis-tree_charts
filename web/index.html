@@ -66,11 +66,11 @@ https://www.d3indepth.com/hierarchies/ -->
         var tree = d3.layout.tree()
             .size([height, width]);
 
-        // this is grabbing svg data from the tree layout, but dont know how
-        var diagonal = d3.svg.diagonal()
-            .projection(function(d) { 
-                console.log(d)
-                return [d.y, d.x]; });
+        // // this is grabbing svg data from the tree layout, but dont know how
+        // var diagonal = d3.svg.diagonal()
+        //     .projection(function(d) { 
+        //         console.log(d)
+        //         return [d.y, d.x]; });
 
 
         var treeData = [
@@ -120,6 +120,8 @@ https://www.d3indepth.com/hierarchies/ -->
 
             // ----------------------------------------- RENDERING -----------------------------------------
 
+            // NODES
+
             // Update the nodes… and assign id
             var node = svg.selectAll("g.node")
                 .data(nodes, function(d) { return d.id || (d.id = ++i); });
@@ -146,23 +148,24 @@ https://www.d3indepth.com/hierarchies/ -->
                 .duration(duration)
                 .attr("transform", function(d) { return "translate(" + d.y + "," + d.x + ")"; });
 
+            // EDGES
 
-            var link = svg.selectAll("path.link")
-                .data(links, function(d) { return d.target.id; });
+            // var link = svg.selectAll("path.link")
+            //     .data(links, function(d) { return d.target.id; });
 
-            // Enter any new links at the parent's previous position.
-            link.enter().insert("path", "g")
-                .attr("class", "link")
-                // this function defines the animation
-                .attr("d", function(d) { 
-                    var o = {x: source.x0, y: source.y0};
-                    return diagonal({source: o, target: o});
-                });
+            // // Enter any new links at the parent's previous position.
+            // link.enter().insert("path", "g")
+            //     .attr("class", "link")
+            //     // this function defines the animation
+            //     .attr("d", function(d) { 
+            //         var o = {x: source.x0, y: source.y0};
+            //         return diagonal({source: o, target: o});
+            //     });
 
-            // This runs the animation defined above
-            link.transition()
-                .duration(duration)
-                .attr("d", diagonal);
+            // // This runs the animation defined above
+            // link.transition()
+            //     .duration(duration)
+            //     .attr("d", diagonal);
 
         }
 
